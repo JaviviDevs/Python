@@ -1,12 +1,16 @@
 from Calculadora import Calculadora
 
-# Definición de la función "main"
+'''
+Main()
+Pide la entrada de datos (la operacion) al usuario y calcula la operacion
+mediante la creación del objeto calculadora.
+'''
 def main():
     # Lógica principal de tu programa
     operacion=input("Por favor introduzca la operación a calcular: ")
     calculadora=Calculadora(operacion)
     calculadora.calcular()
 
-# Verificación para asegurarnos de que estamos ejecutando este archivo directamente
+# Main
 if __name__ == "__main__":
     main()
