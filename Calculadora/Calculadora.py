@@ -22,6 +22,16 @@ class Calculadora:
     def tratarOperacion(self):
         self.__operacion=[self.__operacion.replace(" ","")] 
     
+    def tratarDimensiones(self,Operaciones,Operadores):
+        OperacionesTratadas=[]
+        OperadoresTratados=[]
+        for Operacion in Operaciones:
+            OperacionesTratadas.append(Operacion[0])
+        
+        for Operadors in Operadores[0]:
+            OperadoresTratados.append(Operadors)
+
+        return OperacionesTratadas,OperadoresTratados
     '''
     calcular()
     Calcula la operación pedida: trata la operacion para quitarle espacios en blanco y realiza la operacion 
@@ -39,7 +49,20 @@ class Calculadora:
         print(Operaciones)
         print(Operadores2)
         print(Operaciones2)
+        self.sustituirOperacionesPorResultado(Operaciones,Operaciones2,Operadores2,self.operadoresMultDiv)
+        OperacionesTratadas,OperadoresTratados=self.tratarDimensiones(Operaciones,Operadores)
+        print(OperacionesTratadas,OperadoresTratados)
+        print(self.realizarOperacion(OperacionesTratadas,OperadoresTratados))
 
+    #************************* PROCESO DE DESCOMPOSICION DE LA OPERACION ************************
+    '''
+    descomponerOperacion()
+    Descompone una operacion en operaciones más simples
+    @param operacionADescomponer: operacion a descomponer en operaciones más sencillas
+    @param operadoresDescomponedor: operadores que dividen la operación en otras mas sencillas
+    @return Operaciones: matriz que almacena las operaciones sencillas en las que se ha dividido la operacion
+    @return Operadores: matriz que almacena los operadores que han servido para descomponer la operacion
+    '''
     def descomponerOperacion(self,operacionADescomponer,OperadoresDescomponedor):
         Operadores=[]
         Operaciones=[]
@@ -47,6 +70,13 @@ class Calculadora:
         Operaciones=self.obtenerOperaciones(operacionADescomponer,OperadoresDescomponedor)
         return Operaciones,Operadores
 
+    '''
+    obtenerOperadores()
+    Obtiene los operadores que descomponen la operacion
+    @param operacionADescomponer: operacion a descomponer en operaciones más sencillas
+    @param operadoresAObtener: tipo de operadores que quieren obtenerse
+    @return ListaOperadoresCuentas: matriz que almacena los operadores que han servido para descomponer la operacion
+    '''
     def obtenerOperadores(self,operacionADescomponer,OperadoresAObtener):
         ListaOperadoresCuentas=[]
         for operacion in operacionADescomponer:
@@ -60,6 +90,23 @@ class Calculadora:
 
         return ListaOperadoresCuentas
 
+    '''
+    obtenerOperaciones()
+    Obtiene las operaciones sencillas en las que se descompuso la operacion
+    @param operacionADescomponer: operacion a descomponer en operaciones más sencillas
+    @param operadoresDescomponedor: operadores que dividen la operación en otras mas sencillas
+    @return Operaciones: matriz que almacena las operaciones sencillas en las que se ha dividido la operacion
+
+    Cuando el operadores es una suma recta, ej: 6+5*4+3*2 devuelve: [[6],[5,*,4],[3,*,2]]
+    Cuando el operadores es una multiplicacion division, ej: [[6],[5,*,4],[3,*,2]] devuelve: [[5,4],[3,2]]
+    es decir, como se ve en los condicionales, descompone de manera diferente las operaciones:
+    descompone de una manera las sumas y restas, y de otra la division y multiplicación, todo esto
+    para tener una estructura de datos favorable para calcular las operaciones. 
+    Ya que si se descompusiesen igual, para la operación  6+5*4+3*2*2 ocurriria lo siguiente:
+    6+5*4+3*2*2-->[[6],[5,*,4],[3,*,2,*,2]] -->[[5],[4],[3],[2],[2]] y de esta manera, no se sabe
+    si por ejemplo la operacion es 5*4*3 y luego otra 2*2 o si es 5*4, y luego 3*2*2.
+
+    '''
     def obtenerOperaciones(self,operacionADescomponer,OperadoresDescomponedor):
         ListaOperacionesCuentas=[]
         for operacion in operacionADescomponer:
@@ -68,7 +115,7 @@ class Calculadora:
                 for caracter in operacion:
                     if caracter not in OperadoresDescomponedor:
                         OperacionesCuenta.append(caracter)
-                    else:
+                    elif(caracter not in self.operadoresMultDiv):
                         ListaOperacionesCuentas.append(OperacionesCuenta)
                         OperacionesCuenta=[]
                 
@@ -76,17 +123,113 @@ class Calculadora:
 
         return ListaOperacionesCuentas
 
-
-    def hayOperacion(self,operacion,operadoresDescomponedor):
+    '''
+    hayOperacion()
+    Para un elemento de la matriz que contiene las operaciones simplificadas, detecta si hay una operacion
+    o no. Por ejemplo [[7],[5,*,6]]: 7 --> devuelve False mientras 5*6 devuelve True
+    @param operacion: elemento de la matriz de operaciones a analizar
+    @param operadorAEncontrar: operador a encontrar en el elemento, para saber si hay o no una operacion
+    @return hayOperacion: True si encuentra el operador, false si no.
+    '''
+    def hayOperacion(self,operacion,operadorAEncontrar):
         hayOperacion=False
         for caracter in operacion:
-            if caracter in operadoresDescomponedor:
+            if caracter in operadorAEncontrar:
                 hayOperacion=True
 
         return hayOperacion
 
+    #**********************************************************************************************
+    #************************** METODOS PARA REALIZAR LAS OPERACIONES *****************************
+    
 
+    def sustituirOperacionesPorResultado(self,operacionesASustituir,operaciones,operadores,operadorABuscar):
+        resultados=[]
+        for operacion,operadors in zip(operaciones,operadores):
+            # Los corchetes son para forzar que el formato del vector operacionesASustituir sea para 
+            # el ejemplo 3*4*4+5*5*5
+            # [[3],[16],[125]], sino acabaria siendo [[3],16,125] y daría problemas con la indexación.
+            resultados.append([self.realizarOperacion(operacion,operadors)]) 
 
+        posicionOperaciones=0
+        while(len(resultados)>0):
+            if(self.hayOperacion(operacionesASustituir[posicionOperaciones],operadorABuscar)):
+                resultado=resultados.pop(0)
+                operacionesASustituir[posicionOperaciones]=resultado
+
+            posicionOperaciones=posicionOperaciones+1
+
+        print("OPERACIONES FINAL")
+        print(operacionesASustituir)
+
+    '''
+    Realizaroperacion()
+    Realiza las operaciones suma, resta, multiplicación y división.
+    @param numeros: lista de números de la operacion.Ej: [5,6,7,8]
+    @param operadores: lista de operadores de la operación [*,*,/]
+    @return resultado: resultado de la operacion
+    '''
+    def realizarOperacion(self,operacion,operadores):
+        numeros=operacion.copy()
+        operadors=operadores.copy()
+        resultado=0
+        while(len(numeros)>1):
+            operando1=float(numeros.pop(0)) #Se borra el primer numero de la operacion
+            operando2=float(numeros.pop(0)) #Se borra el segundo numero de la operacion
+            operador=operadors.pop(0)
+            if operador == '+':
+                resultado=self.suma(operando1,operando2)
+            elif(operador== '-'):
+                 resultado=self.resta(operando1,operando2)
+            elif(operador== '*'):
+                 resultado=self.multiplicacion(operando1,operando2)
+            elif(operador== '/'):
+                 resultado=self.division(operando1,operando2)
+                 
+            numeros.insert(0,resultado)
+
+        return resultado
+    
+    '''
+    suma()
+    Hace la suma de dos números (dos operandos)
+    @param op1: operandos1
+    @param op2: operandos2
+    @return op1+op2: Suma de los operandos
+    '''
+    def suma(self,op1,op2):
+        return op1+op2
+    
+    '''
+    resta()
+    Hace la resta de dos números (dos operandos)
+    @param op1: operandos1
+    @param op2: operandos2
+    @return op1+op2: Resta de los operandos
+    '''
+    def resta(self,op1,op2):
+        return op1-op2
+    
+
+    '''
+    multiplicacion()
+    Hace la multiplicacion de dos números (dos operandos)
+    @param op1: operandos1
+    @param op2: operandos2
+    @return op1+op2: Multiplica de los operandos
+    '''
+    def multiplicacion(self,op1,op2):
+        return op1*op2
+    
+    '''
+    division()
+    Hace la suma de dos números (dos operandos)
+    @param op1: operandos1
+    @param op2: operandos2
+    @return op1+op2: Suma de los operandos
+    '''
+    def division(self,op1,op2):
+        return op1/op2
 
 
 
@@ -125,98 +268,3 @@ class Calculadora:
 
         
     
-   
-    
-'''    
-    ____obtenerOperadores()
-    Obtiene los operaciores de la operacion
-    
-    def __obtenerOperadores(self,operacion,operadoresAObtener):
-        operadoresConseguidos=[]
-        for caracter in operacion:
-            if caracter in operadoresAObtener:
-                operadoresConseguidos.append(caracter)
-        return operadoresConseguidos
-
-    
-    ____obtenerNúmeros()
-    Obtiene los números de la operacion
-    
-    def __obtenerOperacionesMultDiv(self,OperadoresDivisores):
-        operacion=""
-        for caracter in self.__operacion:
-            if(caracter in OperadoresDivisores):
-                self.__operacionesMultDiv.append(operacion)
-                operacion=""
-            else:
-                operacion+=caracter
-        self.__operacionesMultDiv.append(operacion) #Para añadir el ultimo número de la operacion
-
-    def __calcularMultiplicacionesDivisiones(self):
-        operadoresConseguidos=[]
-        #Recorrer las operaciones de multiplicaciónDvisiton
-        for operacionMulDiv in self.__operacionesMultDiv:
-            if(self.__hayOperacion(operacionMulDiv,self.__operadoresMultDiv)):#Si hay operacion
-                #Conseguir los numeros
-                operadoresConseguidos=self.__obtenerOperadores(operacionMulDiv,self.__operadoresMultDiv)
-                #Realizar operacion
-                #Actualizar vector de operaciones
-
-    def __hayOperacion(self,operacion,operadoresABuscar):
-        hayOperacion=False
-        for caracter in operacion:
-            if caracter in operadoresABuscar:
-                hayOperacion=True
-        return hayOperacion
-    
-    ____obtenerNúmeros()
-    Obtiene los números de la operacion
-    
-    def __obtenerNumeros(self):
-        numero=""
-        for operacion in self.__operacion:
-            if(operacion in self.__operadoresUsados):
-                self.__Numeros.append(float(numero))
-                numero=""
-            else:
-                numero+=operacion
-        self.__Numeros.append(float(numero)) #Para añadir el ultimo número de la operacion
-
-    ''''''
-    ____operaciones()
-    Realiza el cálculo de la operacion
-   
-    def __Realizaroperaciones(self,numeros,operadores):
-        resultado=0
-        while(len(self.__Numeros)>1):
-            operando1=numeros[0]
-            operando2=numeros[1]
-            if operadores[0] == '+':
-                resultado=self.__suma(operando1,operando2)
-            elif(operadores[0] == '-'):
-                 resultado=self.__resta(operando1,operando2)
-            elif(operadores[0] == '*'):
-                 resultado=self.__multiplicacion(operando1,operando2)
-            elif(operadores[0] == '/'):
-                 resultado=self.__division(operando1,operando2)
-
-
-            operadores.pop(0)
-            numeros.pop(0) #Se borra el primer numero de la operacion
-            numeros.pop(0) #Se borra el segundo numero de la operacion
-            numeros.insert(0,resultado)
-            print(numeros)
-
-        return resultado
-    
-    def __suma(self,op1,op2):
-        return op1+op2
-    
-    def __resta(self,op1,op2):
-        return op1-op2
-    
-    def __multiplicacion(self,op1,op2):
-        return op1*op2
-    
-    def __division(self,op1,op2):
-        return op1/op2'''
