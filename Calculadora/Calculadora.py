@@ -14,6 +14,7 @@ class Calculadora:
         self.__operacion = operacion
         self.operadoresSumRest=['+', '-']
         self.operadoresMultDiv=['*', '/']
+        self.operadores=['+', '-','*', '/']
 
     '''
     tratarOperacion()
@@ -25,6 +26,7 @@ class Calculadora:
     def tratarDimensiones(self,Operaciones,Operadores):
         OperacionesTratadas=[]
         OperadoresTratados=[]
+        
         for Operacion in Operaciones:
             OperacionesTratadas.append(Operacion[0])
         
@@ -50,9 +52,16 @@ class Calculadora:
         print(Operadores2)
         print(Operaciones2)
         self.sustituirOperacionesPorResultado(Operaciones,Operaciones2,Operadores2,self.operadoresMultDiv)
-        OperacionesTratadas,OperadoresTratados=self.tratarDimensiones(Operaciones,Operadores)
-        print(OperacionesTratadas,OperadoresTratados)
-        print(self.realizarOperacion(OperacionesTratadas,OperadoresTratados))
+
+        if(len(Operadores))>0:
+            OperacionesTratadas,OperadoresTratados=self.tratarDimensiones(Operaciones,Operadores)
+            print(OperacionesTratadas,OperadoresTratados)
+            print(self.realizarOperacion(OperacionesTratadas,OperadoresTratados))
+        else:
+            OperacionesTratadas,OperadoresTratados=self.tratarDimensiones(Operaciones,Operadores2)
+            print(OperacionesTratadas,OperadoresTratados)
+            print(OperacionesTratadas[0])
+        
 
     #************************* PROCESO DE DESCOMPOSICION DE LA OPERACION ************************
     '''
@@ -111,7 +120,7 @@ class Calculadora:
         ListaOperacionesCuentas=[]
         for operacion in operacionADescomponer:
             OperacionesCuenta=[]
-            if(self.hayOperacion(operacion,OperadoresDescomponedor)):
+            if(self.hayOperacion(operacion)):
                 for caracter in operacion:
                     if caracter not in OperadoresDescomponedor:
                         OperacionesCuenta.append(caracter)
@@ -128,16 +137,15 @@ class Calculadora:
     Para un elemento de la matriz que contiene las operaciones simplificadas, detecta si hay una operacion
     o no. Por ejemplo [[7],[5,*,6]]: 7 --> devuelve False mientras 5*6 devuelve True
     @param operacion: elemento de la matriz de operaciones a analizar
-    @param operadorAEncontrar: operador a encontrar en el elemento, para saber si hay o no una operacion
-    @return hayOperacion: True si encuentra el operador, false si no.
+    @return hayOp: True si encuentra el operador, false si no.
     '''
-    def hayOperacion(self,operacion,operadorAEncontrar):
-        hayOperacion=False
+    def hayOperacion(self,operacion):
+        hayOp=False
         for caracter in operacion:
-            if caracter in operadorAEncontrar:
-                hayOperacion=True
+            if caracter in self.operadores:
+                hayOp=True
 
-        return hayOperacion
+        return hayOp
 
     #**********************************************************************************************
     #************************** METODOS PARA REALIZAR LAS OPERACIONES *****************************
@@ -153,7 +161,7 @@ class Calculadora:
 
         posicionOperaciones=0
         while(len(resultados)>0):
-            if(self.hayOperacion(operacionesASustituir[posicionOperaciones],operadorABuscar)):
+            if(self.hayOperacion(operacionesASustituir[posicionOperaciones])):
                 resultado=resultados.pop(0)
                 operacionesASustituir[posicionOperaciones]=resultado
 
