@@ -120,15 +120,24 @@ class Calculadora:
         ListaOperacionesCuentas=[]
         for operacion in operacionADescomponer:
             OperacionesCuenta=[]
+            numero=""
             if(self.hayOperacion(operacion)):
                 for caracter in operacion:
-                    if caracter not in OperadoresDescomponedor:
-                        OperacionesCuenta.append(caracter)
-                    elif(caracter not in self.operadoresMultDiv):
-                        ListaOperacionesCuentas.append(OperacionesCuenta)
-                        OperacionesCuenta=[]
-                
-                ListaOperacionesCuentas.append(OperacionesCuenta) #Para añadir el ultimo número de cada operacion
+                    if caracter not in self.operadores:
+                        numero+=caracter
+                    else:
+                        OperacionesCuenta.append(numero)
+                        numero=""
+
+                        if caracter not in OperadoresDescomponedor:
+                            OperacionesCuenta.append(caracter)
+                        elif(caracter not in self.operadoresMultDiv):
+                            ListaOperacionesCuentas.append(OperacionesCuenta)
+                            OperacionesCuenta=[]
+
+                #Para añadir el ultimo número de cada operacion
+                OperacionesCuenta.append(numero) 
+                ListaOperacionesCuentas.append(OperacionesCuenta) 
 
         return ListaOperacionesCuentas
 
