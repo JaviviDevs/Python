@@ -9,7 +9,7 @@ def main():
     # Lógica principal de tu programa
     operacion=input("Por favor introduzca la operación a calcular: ")
     calculadora=Calculadora(operacion)
-    calculadora.calcular()
+    calculadora.calcularOperacion()
 
 # Main
 if __name__ == "__main__":
