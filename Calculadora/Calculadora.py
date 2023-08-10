@@ -10,8 +10,7 @@ class Calculadora:
     Contrcutor de la clase
     @param operacion: operacion a realizar
     '''
-    def __init__(self, operacion):
-        self.__operacion = operacion
+    def __init__(self):
         self.sigSumRest=['+', '-']
         self.sigMultDiv=['*', '/']
         self.signos=['+', '-','*', '/']
@@ -23,9 +22,13 @@ class Calculadora:
     La intención de esto es para que el mismo método que descompone la operación en otras más sencillas
     sirva tanto para descomponer la operación por primera vez, como para las siguientes veces.
     Ej: [[5+5*5+6*6]] -->[[5,5*5,6*6]] --> [[5,5],[6,6]]
+    @param opAtratar: operacion a la que se le va a quitar los espacios en blanco y
+    convertirla en una matriz
+    @return op: misma operación pero sin espacios en blanco y en forma de matriz
     '''
-    def tratarOperacion(self):
-        self.__operacion=[[self.__operacion.replace(" ","")]] 
+    def tratarOperacion(self,opATratar):
+        op=[[opATratar.replace(" ","")]] 
+        return op
 
     '''
     operacionesCombinadas()
@@ -58,14 +61,16 @@ class Calculadora:
     ##################################################################################################
     ##################################################################################################
     '''
-    calcular()
+    calcularOperacion()
     Calcula la operación pedida: trata la operacion para quitarle espacios en blanco 
     y realiza la operacion descomponiendola en operaciones mas sencillas si es necesario.
+    @param opACalcular: operación a calcular
+    @return resultadoFinal: resultado de la operación
     '''    
-    def calcularOperacion(self):
-        self.tratarOperacion() #Elimina espacios en blanco
-        if self.operacionesCombinadas(self.__operacion[0][0]):
-            operaciones,signos=self.descomponerOperacion(self.__operacion,self.sigSumRest)
+    def calcularOperacion(self,opACalcular):
+        opACalcular=self.tratarOperacion(opACalcular) #Elimina espacios en blanco
+        if self.operacionesCombinadas(opACalcular[0][0]):
+            operaciones,signos=self.descomponerOperacion(opACalcular,self.sigSumRest)
             NumerosMultDiv,SignosMultDiv=self.descomponerOperacion(operaciones,self.sigMultDiv)
             #print(signos)
             #print(operaciones)
@@ -73,15 +78,16 @@ class Calculadora:
             #print(SignosMultDiv)
             #print(NumerosMultDiv)
         else:
-            if self.hayOperador(self.__operacion[0][0],self.sigSumRest):
-                operaciones,signos=self.descomponerOperacion(self.__operacion,self.sigSumRest)
+            if self.hayOperador(opACalcular[0][0],self.sigSumRest):
+                operaciones,signos=self.descomponerOperacion(opACalcular,self.sigSumRest)
             else:
-                operaciones,signos=self.descomponerOperacion(self.__operacion,self.sigMultDiv)
+                operaciones,signos=self.descomponerOperacion(opACalcular,self.sigMultDiv)
             #print(signos)
             #print(operaciones)
             
         resultadoFinal=self.realizarOperacion(operaciones[0],signos[0])
-        print(resultadoFinal)
+        #print(resultadoFinal) 
+        return resultadoFinal
 
 
        
